@@ -1,0 +1,51 @@
+parameters:
+
+services:
+    coin_gecko.cache:
+        class: Symfony\Component\Cache\Adapter\FilesystemAdapter
+
+    coin_gecko.service.data_fetcher:
+        class: Bot\Service\CoinDataFetcher
+        arguments:
+            - '@coin_gecko.client'
+            - '@coin_gecko.collection.coin_config'
+            - '@coin_gecko.cache'
+
+    coin_gecko.service.coin_data_processor:
+        class: Bot\Service\CoinDataProcessor
+        arguments:
+            - '@coin_gecko.service.database_processor'
+
+    coin_gecko.service.database_processor:
+        class: Bot\Service\DataBaseProcessor
+        arguments:
+            - '@service_container'
+
+    coin_gecko.client:
+        factory: ['@coin_gecko.factory.coin_gecko_client', create]
+
+    #Collection
+    coin_gecko.collection.coin_config:
+        class: Bot\Collection\CoinConfigCollection
+        factory: ['@coin_gecko.factory.coin_config_collection', create]
+
+    #DTO
+    coin_gecko.dto.api_config:
+        class: Bot\DTO\ApiConfigDto
+        factory: ['@coin_gecko.factory.api_config', create]
+
+    #Factory
+    coin_gecko.factory.coin_gecko_client:
+        class: Bot\Factory\CoinGeckoClientFactory
+        arguments:
+            - '@coin_gecko.dto.api_config'
+
+    coin_gecko.factory.api_config:
+        class: Bot\Factory\ApiConfigFactory
+        arguments:
+            - '@service_container'
+
+    coin_gecko.factory.coin_config_collection:
+        class: Bot\Factory\CoinConfigCollectionFactory
+        arguments:
+            - '@service_container'
